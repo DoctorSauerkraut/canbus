@@ -1,1 +1,3 @@
 - Clean displayer (Multi display options ?)
+- Multi-bus (High rate/low rate)
+- Config to allow/forbid signature (actually it is always allowed)
