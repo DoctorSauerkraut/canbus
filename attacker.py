@@ -80,7 +80,7 @@ class Transmitter(threading.Thread):
 if __name__=="__main__":
     # create a bus instance
     bus = CanBUS(interface='socketcan',
-                  channel='vcan0',
+                  channel='can0',
                   receive_own_messages=True)
     
     #Defining node ID

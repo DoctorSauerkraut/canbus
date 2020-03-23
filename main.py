@@ -8,9 +8,9 @@ import json
 
 from canbus import *
 
-def launchNode(nodeId, canFilter, networkNodes, isSigned):
+def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
     bus = CanBUS(interface='socketcan',
-                  channel='vcan0',
+                  channel=canChannel,
                   can_filters=canFilter,
                   receive_own_messages=True) 
     
@@ -52,7 +52,7 @@ def prepareSim(params):
             newfilt = [{"can_id": canFilter[0]["can_id"]+k , "can_mask": 0x00001FF0}] 
         
         filters.append(newfilt)
-        threads.append(launchNode(networkNodes[k][0], newfilt, networkNodes, networkNodes[k][1]))
+        threads.append(launchNode(networkNodes[k][0], newfilt, networkNodes, networkNodes[k][1], params["channel"]))
         
     return (threads, filters, networkNodes)
 

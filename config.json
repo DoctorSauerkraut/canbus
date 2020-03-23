@@ -3,5 +3,6 @@
   "sign": true,
   "nbNodes": 35,
   "verbose": true,
-  "delay": 200000
+  "delay": 200000,
+"channel":"can0"
 }
