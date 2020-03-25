@@ -9,6 +9,10 @@ import json
 from canbus import *
 
 def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
+    """
+    Initializing the bus interface
+    and preparing the reception and transmission threads
+    """
     bus = CanBUS(interface='socketcan',
                   channel=canChannel,
                   can_filters=canFilter,
@@ -19,10 +23,12 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
 
     recThread = ReceivingThread(bus, nodeId, ec, isSigned)
     transThread = TransmittingThread(bus, nodeId, networkNodes, ec, isSigned)
-        
+    
+    # Starting reception thread
     print("Starting the receiver")
     recThread.start()
     
+    # Starting transmission thread
     print("Starting the transmitter")
     transThread.start()
     
@@ -30,6 +36,9 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
  
     
 def prepareSim(params):
+    """
+    Setting up the network nodes and the filters applied to it
+    """
     networkNodes = []
     for i in range(0, params["nbNodes"]):
         networkNodes.append((params["id"]+i, params["sign"]))
@@ -57,6 +66,9 @@ def prepareSim(params):
     return (threads, filters, networkNodes)
 
 def logSim(threads, filters, networkNodes):
+    """
+    Simulation logging-dedicated function
+    """
     nbNodes = params["nbNodes"]
     #Display network current state
     system("clear")
@@ -124,6 +136,9 @@ def logSim(threads, filters, networkNodes):
     return errorsCount
 
 def launchSim(params):
+    """ 
+    Launching the simulation for a given time
+    """
     #initialize thread list and prepare simulation
     threads, filters, networkNodes = prepareSim(params)
 
@@ -131,13 +146,11 @@ def launchSim(params):
     params["startTime"] = time.time()
     errorsCount = {}
     
-    #file=open("log.txt", "a")
     while (params["verbose"]==True and (time.time()-params["startTime"])<params["delay"]):
         currentTime = time.time()      
         errorsCount = logSim(threads, filters, networkNodes)
         timeVal = currentTime-params["startTime"]
         timeVal = round(timeVal*100)/100
-        #file.write(str(timeVal)+"\t"+str(errorsCount["1B"])+"\t"+str(errorsCount["TXMAX"])+"\n")
         j = j+1
         time.sleep(0.5)   
         
@@ -145,6 +158,10 @@ def launchSim(params):
     return errorsCount
 
 if __name__ == "__main__": 
+    """
+    Opening the JSON config file and preparing the simulation
+    """
+    
     #JSON Config loading
     with open('config.json', 'r') as f:
       params = json.load(f)
