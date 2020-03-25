@@ -1,8 +1,10 @@
 {
-  "id": 0,
-  "sign": true,
-  "nbNodes": 35,
-  "verbose": true,
-  "delay": 200000,
-"channel":"can0"
+    "id": 0,
+    "sign": true,
+    "nbNodes": 35,
+    "verbose": true,
+    "delay": 200000,
+    "channel":"can0",
+    "reception":false,
+    "transmission":true
 }

@@ -8,13 +8,19 @@ import json
 
 from canbus import *
 
-def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
+"""
+@author Olivier Cros
+CAN BUS Simulation Main file
+Launching simulation and logging machine
+"""
+
+def launchNode(nodeId, canFilter, networkNodes, isSigned, params):
     """
     Initializing the bus interface
     and preparing the reception and transmission threads
     """
     bus = CanBUS(interface='socketcan',
-                  channel=canChannel,
+                  channel=params["channel"],
                   can_filters=canFilter,
                   receive_own_messages=True) 
     
@@ -25,12 +31,14 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, canChannel):
     transThread = TransmittingThread(bus, nodeId, networkNodes, ec, isSigned)
     
     # Starting reception thread
-    print("Starting the receiver")
-    recThread.start()
+    if(params["reception"] == True):
+        print("Starting the receiver")
+        recThread.start()
     
     # Starting transmission thread
-    print("Starting the transmitter")
-    transThread.start()
+    if(params["transmission"] == True):
+        print("Starting the transmitter")
+        transThread.start()
     
     return (recThread,transThread)
  
@@ -61,11 +69,11 @@ def prepareSim(params):
             newfilt = [{"can_id": canFilter[0]["can_id"]+k , "can_mask": 0x00001FF0}] 
         
         filters.append(newfilt)
-        threads.append(launchNode(networkNodes[k][0], newfilt, networkNodes, networkNodes[k][1], params["channel"]))
+        threads.append(launchNode(networkNodes[k][0], newfilt, networkNodes, networkNodes[k][1], params))
         
     return (threads, filters, networkNodes)
 
-def logSim(threads, filters, networkNodes):
+def logSim(threads, filters, networkNodes, params):
     """
     Simulation logging-dedicated function
     """
@@ -100,14 +108,14 @@ def logSim(threads, filters, networkNodes):
               + "\t+" + str(errc.onebyteErr)
               + "\t+" + status
               + "\t+" + str(networkNodes[i][1])
-              + "\t+" + str(round(currentTime - errc.lastTr, 3))
-              + "\t+" + str(round(currentTime - errc.lastRc, 3))  
-              + "\t +" + str(errc.msgrec) 
+              + "\t+" + (str(round(currentTime - errc.lastTr, 3)) if (params["transmission"] == True) else "-")
+              + "\t+" + (str(round(currentTime - errc.lastRc, 3)) if (params["reception"] == True) else "-")
+              + "\t+" + str(errc.msgrec) 
               + "\t+" + str(errc.msgtra)
               + "\t+"  + hex(filters[i][0]["can_id"])
               + "\t+"  + hex(filters[i][0]["can_mask"])
-              + "\t+" + str(round(currentTime - errc.lastTx, 3) )+"\t"
-              + "\t+" + str(round(currentTime - errc.lastRx, 3)) )
+              + "\t+" + (str(round(currentTime - errc.lastTx, 3)) if (params["transmission"] == True) else "-")
+              + "\t+" +  (str(round(currentTime - errc.lastRx, 3)) if (params["reception"] == True) else "-"))
         
         totErrOneB = totErrOneB + errc.onebyteErr
         
@@ -148,7 +156,7 @@ def launchSim(params):
     
     while (params["verbose"]==True and (time.time()-params["startTime"])<params["delay"]):
         currentTime = time.time()      
-        errorsCount = logSim(threads, filters, networkNodes)
+        errorsCount = logSim(threads, filters, networkNodes, params)
         timeVal = currentTime-params["startTime"]
         timeVal = round(timeVal*100)/100
         j = j+1
@@ -161,10 +169,9 @@ if __name__ == "__main__":
     """
     Opening the JSON config file and preparing the simulation
     """
-    
     #JSON Config loading
     with open('config.json', 'r') as f:
-      params = json.load(f)
+        params = json.load(f)
     
     startTime = time.time()  
     
