@@ -1,12 +1,14 @@
-from receivingthread import *
-from transmittingthread import *
+from receivingthread import ReceivingThread
+from transmittingthread import TransmittingThread
+from transmittingthread import ErrorCounter
 import can
 import sys
 import os
-from os import system, name 
+import time
+from os import system, name
 import json
 
-from canbus import *
+from canbus import CanBUS
 
 """
 @author Olivier Cros
@@ -50,12 +52,13 @@ def prepareSim(params):
     networkNodes = []
     for i in range(0, params["nbNodes"]):
         networkNodes.append((params["id"]+i, params["sign"]))
-        
+
+    node_id = params["id"]     
     #Receiver mask
-    if(params["sign"]==True):
-        canFilter=  [{"can_id": 0x12300000, "can_mask": 0x1FFF0000}]
+    if(params["sign"]==True):    
+        canFilter=  [{"can_id": (node_id<<16), "can_mask": 0x1FFF0000}]
     else:
-        canFilter=  [{"can_id": 0x00001230, "can_mask": 0x00001FFF}]
+        canFilter=  [{"can_id": 0x1230+ node_id, "can_mask": 0x00001FFF}]
     #initialize thread list
     threads=[]
     
@@ -176,4 +179,5 @@ if __name__ == "__main__":
     startTime = time.time()  
     
     #Start the simulation
-    errorsCount = launchSim(params)     
+    errorsCount = launchSim(params) 
+    

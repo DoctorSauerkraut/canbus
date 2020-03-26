@@ -11,6 +11,9 @@ from canbus import CanBUS
 
 
 class Transmitter(threading.Thread):
+    """
+    Transmission module
+    """
     bus = None
     idnode = 0
     tx_err = 0
@@ -29,6 +32,9 @@ class Transmitter(threading.Thread):
             return False
     
     def run(self):
+        """
+        Starts the transmitter
+        """
         trans.transmit()
     
     def computeFalseData(self):

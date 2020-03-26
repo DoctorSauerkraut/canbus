@@ -9,7 +9,9 @@ import time
 from cannode import Node
 from msglistener import Listener
 
-"""Receiver node : Receiving, controlling the signatures and counting Rx/Tx errors"""
+"""
+Receiver node : Receiving, controlling the signatures and counting Rx/Tx errors
+"""
 class Receiver(Node):
     def __init__(self, bus_, id_, ec_, isSigned_):
         self.idnode = id_
@@ -19,6 +21,9 @@ class Receiver(Node):
         self.isSigned = isSigned_
         
     def printReceiverInfo(self):
+        """
+        Print logger for debug purposes
+        """
         print("-----------------")
         print("CAN NODE RECEIVER")
         print("NODE ID:"+str(self.idnode))
@@ -33,7 +38,7 @@ class Receiver(Node):
                 self.ec.lastTx = time.time()
                 self.ec.totTxErr = self.ec.totTxErr + 1
 
-            (encId, dataMsg) = self.sign(msg, self.computeData())
+            (_, dataMsg) = self.sign(msg, self.computeData())
             #print("ERROR MSG:"+hex(encId)+" "+self.ByteToHex(dataMsg))
             
             #If transmission error, send error message
@@ -48,8 +53,11 @@ class Receiver(Node):
             if(self.bus.msgOnBus != []):
                 self.bus.msgOnBus.pop()   
         
-    """Receive and analyze the pakets"""
+    
     def receive(self, msg):
+        """
+        Receive and analyze the pakets
+        """
         self.ec.lastRc = time.time()
         self.ec.msgrec = self.ec.msgrec + 1
         #recvID = int(self.idnode)
