@@ -17,3 +17,15 @@ Config
 
 Attacks and security
 	The project integrates a script (attacker.py) to simulate a DDos Attack on the network. Basically, the messages in the CAN are signed to prevent these attacks.
+
+
+Config.json file
+The config file is attached to each network interface of your network. In other words : one instance of the simulator =  one config file. Here are the details of the parameters
+id : Start of the id range (or id of the current node if there is only one)
+sign : Activate/Deactivate the signature of messages
+nbNodes : number of nodes emulated
+verbose : debug mode
+delay : Delay of simulation (in seconds)
+channel : Network interface name
+Reception : Activate reception module 
+Transmission : Activate transmission module
