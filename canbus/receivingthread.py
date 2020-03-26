@@ -1,6 +1,8 @@
 import threading
 import time
-from receiver import *
+from receiver import Receiver
+from can import Notifier
+from msglistener import MsgListener
 
 class ReceivingThread(threading.Thread):
     bus = None
@@ -17,4 +19,4 @@ class ReceivingThread(threading.Thread):
     def run(self):
         # Initiate receiver
         rec = Receiver(self.bus, self.idnode, self.ec, self.isSigned)
-        notifier = can.Notifier(self.bus, [MsgListener(rec)])
+        Notifier(self.bus, [MsgListener(rec)])

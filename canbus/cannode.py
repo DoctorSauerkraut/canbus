@@ -37,9 +37,9 @@ class Node:
             signMsg.append(msg.arbitration_id&0x000000FF)
             signMsg.append(msg.arbitration_id>>8&0x000000FF)
              
-            arb_id = msg.arbitration_id >> 16      
+            # arb_id = msg.arbitration_id >> 16      
             
-            #print("DATA:"+dts+" SIGN:"+self.ByteToHex(signData))
+            # print("DATA:"+dts+" SIGN:"+self.ByteToHex(signData))
             
             if(signMsg == signData)   :
                 self.counters[dts] = self.counters[dts] + 0x01
@@ -88,7 +88,7 @@ class Node:
     
     def getIdFromSign(self, msg):
         if(self.isSigned==True):
-            sign = self.computeHMAC(str(self.ByteToHex(msg.data)))
+            self.computeHMAC(str(self.ByteToHex(msg.data)))
             arb_id = (msg.arbitration_id)>>16
             return (arb_id<<16)
         else:
@@ -108,7 +108,7 @@ class Node:
     def computeData(self):
         data=[]
 
-        for i in range(0,8-SIGNLENTH):
+        for _ in range(0,8-SIGNLENTH):
             data.append(int(random.uniform(0,256)))
             #data.append(i)
             

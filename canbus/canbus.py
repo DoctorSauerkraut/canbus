@@ -1,6 +1,5 @@
 import time
 
-from can import *
 from can.interfaces.socketcan.socketcan import SocketcanBus
 
 class CanBUS(SocketcanBus):

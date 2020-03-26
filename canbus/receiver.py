@@ -6,8 +6,8 @@ import hmac
 import base64
 import time
 
-from cannode import *
-from msglistener import *
+from cannode import Node
+from msglistener import Listener
 
 """Receiver node : Receiving, controlling the signatures and counting Rx/Tx errors"""
 class Receiver(Node):
@@ -50,12 +50,11 @@ class Receiver(Node):
         
     """Receive and analyze the pakets"""
     def receive(self, msg):
-        bufferMsg = []
         self.ec.lastRc = time.time()
         self.ec.msgrec = self.ec.msgrec + 1
-        recvID = int(self.idnode)
+        #recvID = int(self.idnode)
   
-        tstmp = msg.timestamp
+        #tstmp = msg.timestamp
                 
         #print(str(self.idnode)+":"+"Rx:\t"+str(msg)+"\tRx_ERR:"+str(self.ec.rx_err))
         #print(str(self.bus.msgOnBus))

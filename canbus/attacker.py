@@ -7,7 +7,7 @@ import hmac
 import base64
 import threading
 
-from canbus import *
+from canbus import CanBUS
 
 
 class Transmitter(threading.Thread):
@@ -25,7 +25,6 @@ class Transmitter(threading.Thread):
         
     #Compare transmitted with received message when same id
     def checkTransmission(self, mOnBus, mTrans):
-        rst = True
         if(mOnBus.data != mTrans.data):
             return False
     
@@ -35,7 +34,7 @@ class Transmitter(threading.Thread):
     def computeFalseData(self):
         data=[]
 
-        for i in range(0,7):
+        for _ in range(0,7):
             data.append(int(random.uniform(0,256)))
 
         return data[0:8]

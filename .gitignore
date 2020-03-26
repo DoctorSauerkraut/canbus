@@ -24,3 +24,12 @@ simulation/graph2.plot
 simulation/graph2.png
 simulation/log.txt
 simulation/new_graph.png
+canbus/__pycache__/canbus.cpython-35.pyc
+canbus/__pycache__/cannode.cpython-35.pyc
+canbus/__pycache__/errorcounter.cpython-35.pyc
+canbus/__pycache__/msglistener.cpython-35.pyc
+canbus/__pycache__/receiver.cpython-35.pyc
+canbus/__pycache__/receivingthread.cpython-35.pyc
+canbus/__pycache__/transmitter.cpython-35.pyc
+canbus/__pycache__/transmittingthread.cpython-35.pyc
+.vscode/settings.json

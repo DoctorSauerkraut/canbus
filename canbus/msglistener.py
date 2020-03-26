@@ -1,6 +1,6 @@
-import can
+from can import Listener
 
-class MsgListener(can.Listener):
+class MsgListener(Listener):
     receiver = None
     
     def __init__(self, receiver_):
