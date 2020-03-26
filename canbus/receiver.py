@@ -86,4 +86,3 @@ class Receiver(Node):
             self.ec.rx_err = self.ec.rx_err - 1
         
       
-        
