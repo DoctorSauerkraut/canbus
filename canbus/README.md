@@ -25,9 +25,12 @@ id : Start of the id range (or id of the current node if there is only one)
 
 sign : Activate/Deactivate the signature of messages
 
-nbNodes : number of nodes emulated
+
+nbNodes : number of nodes emulated 
+
 
 verbose : debug mode
+
 
 delay : Delay of simulation (in seconds)
 
