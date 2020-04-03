@@ -10,7 +10,7 @@ while [ $LOOP -ne 1 ]
 		STR=""
 		for HOSTNUM in 1 2 3 4 5 
 			do
-				ping -c 1 $CANNETWORK.1$HOSTNUM > /dev/null
+				ping -c 1 $CANNETWORK.1$HOSTNUM -w 10 > /dev/null
 				if [ $? -eq 0 ]; then
 					STR="$STR$CANNETWORK.1$HOSTNUM --- ALIVE\n"
 				else
