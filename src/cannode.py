@@ -3,6 +3,7 @@ import random
 import hmac
 
 from keymanager import KeyManager
+from exceptions import UnauthorizedAccessToKey
 
 SIGNLENTH = 1
 
@@ -14,7 +15,7 @@ class Node:
     counters = {}
     totalNodes = 0
     kMgr = KeyManager()
-
+    totalGroups = 0
     ec = None  # Error counter
     # Currently transmitting message
     networkNodes = []
@@ -58,7 +59,7 @@ class Node:
         else:
             return True
 
-    def sign(self, msg, data):
+    def sign(self, msg, data, msgId):
         """
         Sign message arbitration id and last byte of data
         """
@@ -68,16 +69,17 @@ class Node:
             # print("INIT DATA:"+str(dataConverted))
             # print("DATA TO SIGN:"+str(dts))
             # print("COUNTER:"+str(self.counters[str(dataConverted)]))
-            rst = self.computeHMAC(dts)
 
-            # print("SIGNATURE:"+ " "+hex(rst[2])+" "
-            # +hex(rst[1])+" "+hex(rst[0]))
+            rst = self.computeHMAC(dts, msgId)
+            # print("NODE::" + str(self.idnode))
+            # print("SIGNATURE:" + " " + hex(rst[2]) + " "
+            #      + hex(rst[1]) + " " + hex(rst[0]))
             encId = (((msg.arbitration_id << 8) + rst[2]) << 8) + rst[1]
 
             # print("ARB ID:"+hex(msg.arbitration_id)+" ENC ID:"+hex(encId))
             return (encId, data+[rst[0]])
         else:
-            return(msg.arbitration_id, data)
+            return (msg.arbitration_id, data)
 
     def checkTransmission(self, mTrans):
         """
@@ -100,14 +102,18 @@ class Node:
             return msg.arbitration_id
 
     # Compute HMAC from 7 bytes of data and keep the last byte of digest
-    def computeHMAC(self, data):
+    def computeHMAC(self, data, msgId):
         rst = []
-        print("DATA HMAC:"+str(data))
+        # print("DATA HMAC:"+str(data))
 
         # Load the key
-        strKey = self.kMgr.loadKey()
-        binKey = bytearray()
-        binKey.extend(map(ord, strKey))
+        try:
+            strKey = self.kMgr.loadKey(self.idnode, msgId)
+            binKey = bytearray()
+            binKey.extend(map(ord, strKey))
+        except UnauthorizedAccessToKey:
+            print("Node "+self.idnode+" tried to access to key "+str(strKey))
+            return
 
         # Specify the CAN key
         hmacComp = hmac.new(binKey, data.encode("utf-8"), hashlib.sha256)
@@ -127,7 +133,20 @@ class Node:
         data = [0x02, 0xdd, 0xe2, 0x52, 0xb0, 0x8d, 0xc6]
         return data[0:8-SIGNLENTH]
 
-    def computeMsgId(self):
-        r = int(random.uniform(0, self.totalNodes)+1)
-        # print("R:"+str(r))
-        return r + self.idnode
+    def computeGroupId(self):
+        """
+        Computes all the destination ids
+        """
+        # print("TOTAL GROUPS:" + str(self.totalGroups))
+        groupId = int(random.uniform(0, self.totalGroups - 1))
+        # print("FMAP:" + str(self.idnode) + " " + str(groupId) + " "
+        #      + str(self.kMgr.getKeyMap()[str(groupId)]))
+
+        while(not self.kMgr.isNodeMemberOfGroup(self.idnode, groupId)):
+            groupId = int(random.uniform(0, self.totalGroups - 1))
+            # print("MAP:" + str(self.idnode) + " " + str(groupId) + " "
+            #      + str(self.kMgr.getKeyMap()[str(groupId)]))
+
+        # print("Node:"+str(self.idnode)+" sending to group "+str(groupId))
+
+        return groupId

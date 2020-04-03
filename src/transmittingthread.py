@@ -1,15 +1,20 @@
 import threading
-import time
 from transmitter import Transmitter
 
+
 class TransmittingThread(threading.Thread):
+    """
+    Thread dedicated to launch an independant transmitting node
+    """
     bus = None
     idnode = 0
     networkNodes = []
     isSigned = False
     totalNodes = 0
+    totalGroups = 0
 
-    def __init__(self,bus_,idnode_, networkNodes_, ec_, isSigned_, totalNodes_):
+    def __init__(self, bus_, idnode_, networkNodes_,
+                 ec_, isSigned_, totalNodes_, totalGroups_):
         threading.Thread.__init__(self)
         self.bus = bus_
         self.idnode = idnode_
@@ -17,7 +22,9 @@ class TransmittingThread(threading.Thread):
         self.ec = ec_
         self.isSigned = isSigned_
         self.totalNodes = totalNodes_
-        
-    def run(self):        
-        trans = Transmitter(self.bus, self.idnode, self.networkNodes, self.ec, self.isSigned, self.totalNodes)
+        self.totalGroups = totalGroups_
+
+    def run(self):
+        trans = Transmitter(self.bus, self.idnode, self.networkNodes, self.ec,
+                            self.isSigned, self.totalNodes, self.totalGroups)
         trans.transmit()

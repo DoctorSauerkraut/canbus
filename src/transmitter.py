@@ -6,13 +6,14 @@ from cannode import Node
 
 class Transmitter(Node):
     def __init__(self, bus_, idnode_, networkNodes_,
-                 ec_, isSigned_, totalNodes_):
+                 ec_, isSigned_, totalNodes_, totalGroups_):
         self.bus = bus_
         self.idnode = idnode_
         self.networkNodes = networkNodes_
         self.ec = ec_
         self.isSigned = isSigned_
         self.totalNodes = totalNodes_
+        self.totalGroups = totalGroups_
 
     def transmit(self):
         # build a message
@@ -25,7 +26,7 @@ class Transmitter(Node):
             # waitTime = random.uniform(1,10)
             waitTime = 10
             dataNotEncoded = self.computeData()
-            msgId = self.computeMsgId()
+            msgId = self.computeGroupId()
 
             messageNotEncoded = can.Message(timestamp=tstmp,
                                             arbitration_id=msgId,
@@ -37,7 +38,9 @@ class Transmitter(Node):
             if (dts not in self.counters):
                 self.counters[dts] = 0x01
 
-            (encId, dataMsg) = self.sign(messageNotEncoded, dataNotEncoded)
+            (encId, dataMsg) = self.sign(messageNotEncoded,
+                                         dataNotEncoded,
+                                         msgId)
 
             message = can.Message(timestamp=tstmp,
                                   arbitration_id=encId,
@@ -46,11 +49,11 @@ class Transmitter(Node):
                                   data=dataMsg)
 
             # Display unsigned message
-            print("--" + str(self.idnode)+":"+"Tx:\t"+str(messageNotEncoded))
+            # print("--" + str(self.idnode)+":"+"Tx:\t"+str(messageNotEncoded))
 
             # Display final signed message
-            print(str(self.idnode)+":"+"Tx:\t"
-                  + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
+            # print(str(self.idnode)+":"+"Tx:\t"
+            #      + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
 
             self.bus.send(message)
             self.ec.msgtra = self.ec.msgtra + 1

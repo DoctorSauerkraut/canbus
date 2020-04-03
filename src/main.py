@@ -7,6 +7,7 @@ from canbus import CanBUS
 from receivingthread import ReceivingThread
 from transmittingthread import TransmittingThread
 from errorcounter import ErrorCounter
+import config
 
 """
 @author Olivier Cros
@@ -28,19 +29,20 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, params):
     bus.set_filters(canFilter)
     ec = ErrorCounter()
     totalNodes = params["totalNodes"]
+    totalGroups = params["groups"]
 
     recThread = ReceivingThread(bus, nodeId, ec, isSigned)
     transThread = TransmittingThread(bus, nodeId, networkNodes,
-                                     ec, isSigned, totalNodes)
+                                     ec, isSigned, totalNodes, totalGroups)
 
     # Starting reception thread
     if(params["reception"]):
-        print("Starting the receiver")
+        print("Starting the receiver " + str(nodeId))
         recThread.start()
 
     # Starting transmission thread
     if(params["transmission"]):
-        print("Starting the transmitter")
+        print("Starting the transmitter " + str(nodeId))
         transThread.start()
 
     return (recThread, transThread)
@@ -164,7 +166,7 @@ def launchSim(params):
     Launching the simulation for a given time
     """
     # nitialize thread list and prepare simulation
-    _, _, _ = prepareSim(params)
+    threads, filters, networkNodes = prepareSim(params)
 
     j = 0
     params["startTime"] = time.time()
@@ -173,7 +175,8 @@ def launchSim(params):
     while (params["verbose"]
            and (time.time() - params["startTime"]) < params["delay"]):
         currentTime = time.time()
-        # errorsCount = logSim(threads, filters, networkNodes, params)
+        if(params["verbose"]):
+            errorsCount = logSim(threads, filters, networkNodes, params)
         errorsCount = 0
         timeVal = currentTime-params["startTime"]
         timeVal = round(timeVal*100)/100
@@ -189,7 +192,7 @@ if __name__ == "__main__":
     Opening the JSON config file and preparing the simulation
     """
     # JSON Config loading
-    with open('config.json', 'r') as f:
+    with open(config.CONFIGPATH + 'config.json', 'r') as f:
         params = json.load(f)
 
     startTime = time.time()
