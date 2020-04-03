@@ -28,6 +28,7 @@ sign : Activate/Deactivate the signature of messages
 
 nbNodes : number of nodes emulated 
 
+totalNodes : Number total of nodes in the physical network (used for node id random computation)s
 
 verbose : debug mode
 

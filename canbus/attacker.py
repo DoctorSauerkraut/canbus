@@ -49,16 +49,14 @@ class Transmitter(threading.Thread):
         # build a message
         tstmp  =time.time()
         sendOk = True
-        #id_count = 0x1232
         
-        id_count = 0x12320000
+        id_count = 0x50b00000
         falseData = [0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0x00]
-        #falseData = [0x00,0x01,0x02,0x03,0x04,0x05,0x06,0xBD]
         r = self.idThread
         
         while(sendOk==True):  
             #Signed     
-            target = id_count+r
+            target = id_count
                       
             #Not signed
             #target = id_count
@@ -89,7 +87,7 @@ if __name__=="__main__":
                   receive_own_messages=True)
     
     #Defining node ID
-    idnode = 0x1231
+    idnode = 0x50b0
     i=0
     attackers = int(sys.argv[1])
 
