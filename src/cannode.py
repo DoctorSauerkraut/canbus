@@ -31,8 +31,12 @@ class Node:
                 toCheck = dts + str(self.counters[dts])
             else:
                 toCheck = dts
+
             # print("ID:"+str(self.idnode)+" COUNTER:"+str(self.counters[dts]))
-            signData = self.computeHMAC(toCheck, msg.arbitration_id)
+            # print("ARB ID:"+hex(msg.arbitration_id))
+            idMsg = self.getIdFromSign(msg)
+            # print("ID:"+str(idMsg))
+            signData = self.computeHMAC(toCheck, idMsg)
 
             signMsg = []
             signMsg.append(msg.data[7])
@@ -66,16 +70,19 @@ class Node:
         if(self.isSigned):
             dataConverted = self.ByteToHex(msg.data)
             dts = str(dataConverted + str(self.counters[str(dataConverted)]))
-            print("INIT DATA:"+str(dataConverted))
-            print("DATA TO SIGN:"+str(dts))
-            print("COUNTER:"+str(self.counters[str(dataConverted)]))
-
             rst = self.computeHMAC(dts, msgId)
-            print("NODE::" + str(self.idnode))
-            print("SIGNATURE:" + " " + hex(rst[2]) + " "
-                  + hex(rst[1]) + " " + hex(rst[0]))
+
+            # Encoded ID computation
             encId = (((msg.arbitration_id << 8) + rst[2]) << 8) + rst[1]
 
+            # Sent message logging
+            # print("INIT DATA:" + str(dataConverted))
+            # print("DATA TO SIGN:" + str(dts))
+            # print("COUNTER:" + str(self.counters[str(dataConverted)]))
+            # print("MSG ID:" + str(msgId))
+            # print("NODE:" + str(self.idnode))
+            # print("SIGNATURE:" + " " + hex(rst[2]) + " "
+            #       + hex(rst[1]) + " " + hex(rst[0]))
             # print("ARB ID:"+hex(msg.arbitration_id)+" ENC ID:"+hex(encId))
             return (encId, data+[rst[0]])
         else:
@@ -95,17 +102,17 @@ class Node:
 
     def getIdFromSign(self, msg):
         if(self.isSigned):
-            self.computeHMAC(str(self.ByteToHex(msg.data)), msg.arbitration_id)
             arb_id = (msg.arbitration_id) >> 16
-            return (arb_id << 16)
+            return (arb_id)
         else:
             return msg.arbitration_id
 
     def getGroupFromMsgId(self, msgId):
         """
-        Gets the group key number corresponding to the message
+        Get group id from msg id
+        Interface between transmitter/receiver and key manager
         """
-        return 1
+        return self.kMgr.getGrpIdFromMsgId(msgId)
 
     def computeHMAC(self, data, msgId):
         """
@@ -118,7 +125,7 @@ class Node:
         try:
             # Load the key
             strKey = self.kMgr.loadKey(self.idnode, grpId)
-            
+
             # Transform the key into binary array
             binKey = bytearray()
             binKey.extend(map(ord, strKey))
@@ -139,25 +146,5 @@ class Node:
 
         for _ in range(0, 8-SIGNLENTH):
             data.append(int(random.uniform(0, 256)))
-            # data.append(i)
 
-        data = [0x02, 0xdd, 0xe2, 0x52, 0xb0, 0x8d, 0xc6]
         return data[0:8-SIGNLENTH]
-
-    def computeGroupId(self):
-        """
-        Computes all the group key ids
-        """
-        print("TOTAL GROUPS:" + str(self.totalGroups))
-        groupId = int(random.uniform(0, self.totalGroups - 1))
-        print("FMAP:" + str(self.idnode) + " " + str(groupId) + " "
-              + str(self.kMgr.getKeyMap()[str(groupId)]))
-
-        while(not self.kMgr.isNodeMemberOfGroup(self.idnode, groupId)):
-            groupId = int(random.uniform(0, self.totalGroups - 1))
-            print("MAP:" + str(self.idnode) + " " + str(groupId) + " "
-                  + str(self.kMgr.getKeyMap()[str(groupId)]))
-
-        print("Node:"+str(self.idnode)+" sending to group "+str(groupId))
-
-        return groupId

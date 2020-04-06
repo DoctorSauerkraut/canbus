@@ -14,6 +14,7 @@ class KeyGen:
 
     # Keymap to define node groups
     keyMap = {}
+    msgMap = {}
 
     def genKey(self, idKey):
         """
@@ -23,11 +24,19 @@ class KeyGen:
         f.write("0123456789")
         f.close()
 
-    def generateMsgMap(self, totalGroups):
+    def generateMsgMap(self, totalGroups, totalMessages):
         """
         Generates a random association between message ids and group keys
         """
-        return True
+        for g in range(0, totalGroups):
+            self.msgMap[str(g)] = []
+
+        for msgCpt in range(0, totalMessages):
+            grp = random.randint(0, totalGroups-1)
+            self.msgMap[str(grp)].append(msgCpt)
+            print("MSG " + str(msgCpt) + "\tGRP " + str(grp))
+        f = open(config.KEYSPATH + "msgmap", "w")
+        json.dump(self.msgMap, f)
 
     def generateKeyMap(self, totalNodes, totalGroups):
         """
@@ -80,8 +89,9 @@ if __name__ == "__main__":
 
     totalNodes = params["totalNodes"]
     totalGroups = params["groups"]
+    totalMessages = params["messages"]
 
     k.generateKeyMap(totalNodes, totalGroups)
-
+    k.generateMsgMap(totalGroups, totalMessages)
     # Node assignation verification
     k.checkKeyMap(totalNodes, totalGroups)

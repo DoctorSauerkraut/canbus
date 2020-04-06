@@ -6,3 +6,10 @@ class UnauthorizedAccessToKey(RuntimeError):
         print("ERROR : Node " + str(idNode)
               + " is not member of group " + str(idGroup))
         exit
+
+
+class NoGroupForMessage(RuntimeError):
+    def __init__(self, idMsg):
+        print("ERROR : The message " + str(idMsg)
+              + " has no associated group key")
+        exit

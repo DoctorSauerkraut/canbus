@@ -24,8 +24,8 @@ class Transmitter(Node):
         while(sendOk and self.ec.tx_err < 256):
             # dest = random.randint(0, len(self.networkNodes)-1)
 
-            # waitTime = random.uniform(1,10)
-            waitTime = 10
+            waitTime = random.uniform(1, 20)
+
             dataNotEncoded = self.computeData()
             msgId = self.computeMsgId()
 
@@ -39,10 +39,12 @@ class Transmitter(Node):
             if (dts not in self.counters):
                 self.counters[dts] = 0x01
 
+            # Signing the message
             (encId, dataMsg) = self.sign(messageNotEncoded,
                                          dataNotEncoded,
                                          msgId)
 
+            # Preparing the final message to send
             message = can.Message(timestamp=tstmp,
                                   arbitration_id=encId,
                                   extended_id=True,
@@ -53,8 +55,8 @@ class Transmitter(Node):
             # print("--" + str(self.idnode)+":"+"Tx:\t"+str(messageNotEncoded))
 
             # Display final signed message
-            print(str(self.idnode)+":"+"Tx:\t"
-                  + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
+            # print(str(self.idnode)+":"+"Tx:\t"
+            #      + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
 
             self.bus.send(message)
             self.ec.msgtra = self.ec.msgtra + 1
@@ -62,7 +64,7 @@ class Transmitter(Node):
             # self.ec.totTxErr = self.ec.totTxErr + 1
 
             # self.bus.msgOnBus.append(message)
-            time.sleep(waitTime/10)
+            time.sleep(waitTime)
 
         if(self.ec.tx_err >= 256):
             print("ERROR COUNT REACHED. TRANSMISSION STOPPED.")
@@ -72,4 +74,17 @@ class Transmitter(Node):
         """
         Computes the message id destination for a message
         """
-        return random.randint(1, self.totalNodes)
+        # We obtain the available group keys for the node
+        grpIds = self.kMgr.getGroupsForNode(self.idnode)
+
+        # We select a random group
+        grpId = grpIds[random.randint(0, len(grpIds) - 1)]
+        # print("GRP :" + str(grpId))
+
+        # We obtain the corresponding list of messages
+        msgIds = self.kMgr.getMessagesFromGroup(grpId)
+
+        # We select a random message
+        msgId = msgIds[random.randint(0, len(msgIds) - 1)]
+
+        return msgId

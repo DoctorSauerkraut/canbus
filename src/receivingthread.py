@@ -19,4 +19,5 @@ class ReceivingThread(threading.Thread):
     def run(self):
         # Initiate receiver
         rec = Receiver(self.bus, self.idnode, self.ec, self.isSigned)
+
         Notifier(self.bus, [MsgListener(rec)])
