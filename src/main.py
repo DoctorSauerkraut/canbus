@@ -36,6 +36,7 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, params):
                                      ec, isSigned, totalNodes, totalGroups)
 
     # Starting reception thread
+    print("Launching the nodes ")
     if(params["reception"]):
         print("Starting the receiver " + str(nodeId))
         recThread.start()
@@ -175,8 +176,9 @@ def launchSim(params):
     while (params["verbose"]
            and (time.time() - params["startTime"]) < params["delay"]):
         currentTime = time.time()
-        if(params["verbose"]):
-            errorsCount = logSim(threads, filters, networkNodes, params)
+
+        # if(params["verbose"]):
+        #    errorsCount = logSim(threads, filters, networkNodes, params)
         errorsCount = 0
         timeVal = currentTime-params["startTime"]
         timeVal = round(timeVal*100)/100

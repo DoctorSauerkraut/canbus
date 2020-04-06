@@ -24,10 +24,10 @@ class KeyManager:
         Checks the group keys corresponding to the given node
         """
 
-        if(self.isNodeMemberOfGroup(idNode, idGroup)):
-            return self.loadKeyFile(idGroup)
-        else:
-            raise UnauthorizedAccessToKey(idNode, idGroup)
+        # if(self.isNodeMemberOfGroup(idNode, idGroup)):
+        return self.loadKeyFile(idGroup)
+        # else:
+        #    raise UnauthorizedAccessToKey(idNode, idGroup)
 
     def loadKeyMap(self):
         """

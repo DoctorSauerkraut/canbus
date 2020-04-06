@@ -23,6 +23,12 @@ class KeyGen:
         f.write("0123456789")
         f.close()
 
+    def generateMsgMap(self, totalGroups):
+        """
+        Generates a random association between message ids and group keys
+        """
+        return True
+
     def generateKeyMap(self, totalNodes, totalGroups):
         """
         Generates a random key map to determine which node can communicate

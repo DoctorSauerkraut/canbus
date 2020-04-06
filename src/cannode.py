@@ -32,7 +32,7 @@ class Node:
             else:
                 toCheck = dts
             # print("ID:"+str(self.idnode)+" COUNTER:"+str(self.counters[dts]))
-            signData = self.computeHMAC(toCheck)
+            signData = self.computeHMAC(toCheck, msg.arbitration_id)
 
             signMsg = []
             signMsg.append(msg.data[7])
@@ -66,14 +66,14 @@ class Node:
         if(self.isSigned):
             dataConverted = self.ByteToHex(msg.data)
             dts = str(dataConverted + str(self.counters[str(dataConverted)]))
-            # print("INIT DATA:"+str(dataConverted))
-            # print("DATA TO SIGN:"+str(dts))
-            # print("COUNTER:"+str(self.counters[str(dataConverted)]))
+            print("INIT DATA:"+str(dataConverted))
+            print("DATA TO SIGN:"+str(dts))
+            print("COUNTER:"+str(self.counters[str(dataConverted)]))
 
             rst = self.computeHMAC(dts, msgId)
-            # print("NODE::" + str(self.idnode))
-            # print("SIGNATURE:" + " " + hex(rst[2]) + " "
-            #      + hex(rst[1]) + " " + hex(rst[0]))
+            print("NODE::" + str(self.idnode))
+            print("SIGNATURE:" + " " + hex(rst[2]) + " "
+                  + hex(rst[1]) + " " + hex(rst[0]))
             encId = (((msg.arbitration_id << 8) + rst[2]) << 8) + rst[1]
 
             # print("ARB ID:"+hex(msg.arbitration_id)+" ENC ID:"+hex(encId))
@@ -95,20 +95,31 @@ class Node:
 
     def getIdFromSign(self, msg):
         if(self.isSigned):
-            self.computeHMAC(str(self.ByteToHex(msg.data)))
+            self.computeHMAC(str(self.ByteToHex(msg.data)), msg.arbitration_id)
             arb_id = (msg.arbitration_id) >> 16
             return (arb_id << 16)
         else:
             return msg.arbitration_id
 
-    # Compute HMAC from 7 bytes of data and keep the last byte of digest
-    def computeHMAC(self, data, msgId):
-        rst = []
-        # print("DATA HMAC:"+str(data))
+    def getGroupFromMsgId(self, msgId):
+        """
+        Gets the group key number corresponding to the message
+        """
+        return 1
 
-        # Load the key
+    def computeHMAC(self, data, msgId):
+        """
+        Computes HMAC from 7 bytes of data and keep the last byte of digest
+        """
+        rst = []
+        # Get the group ID
+        grpId = self.getGroupFromMsgId(msgId)
+
         try:
-            strKey = self.kMgr.loadKey(self.idnode, msgId)
+            # Load the key
+            strKey = self.kMgr.loadKey(self.idnode, grpId)
+            
+            # Transform the key into binary array
             binKey = bytearray()
             binKey.extend(map(ord, strKey))
         except UnauthorizedAccessToKey:
@@ -135,18 +146,18 @@ class Node:
 
     def computeGroupId(self):
         """
-        Computes all the destination ids
+        Computes all the group key ids
         """
-        # print("TOTAL GROUPS:" + str(self.totalGroups))
+        print("TOTAL GROUPS:" + str(self.totalGroups))
         groupId = int(random.uniform(0, self.totalGroups - 1))
-        # print("FMAP:" + str(self.idnode) + " " + str(groupId) + " "
-        #      + str(self.kMgr.getKeyMap()[str(groupId)]))
+        print("FMAP:" + str(self.idnode) + " " + str(groupId) + " "
+              + str(self.kMgr.getKeyMap()[str(groupId)]))
 
         while(not self.kMgr.isNodeMemberOfGroup(self.idnode, groupId)):
             groupId = int(random.uniform(0, self.totalGroups - 1))
-            # print("MAP:" + str(self.idnode) + " " + str(groupId) + " "
-            #      + str(self.kMgr.getKeyMap()[str(groupId)]))
+            print("MAP:" + str(self.idnode) + " " + str(groupId) + " "
+                  + str(self.kMgr.getKeyMap()[str(groupId)]))
 
-        # print("Node:"+str(self.idnode)+" sending to group "+str(groupId))
+        print("Node:"+str(self.idnode)+" sending to group "+str(groupId))
 
         return groupId

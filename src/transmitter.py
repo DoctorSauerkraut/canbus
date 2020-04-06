@@ -1,5 +1,6 @@
 import can
 import time
+import random
 
 from cannode import Node
 
@@ -26,7 +27,7 @@ class Transmitter(Node):
             # waitTime = random.uniform(1,10)
             waitTime = 10
             dataNotEncoded = self.computeData()
-            msgId = self.computeGroupId()
+            msgId = self.computeMsgId()
 
             messageNotEncoded = can.Message(timestamp=tstmp,
                                             arbitration_id=msgId,
@@ -52,8 +53,8 @@ class Transmitter(Node):
             # print("--" + str(self.idnode)+":"+"Tx:\t"+str(messageNotEncoded))
 
             # Display final signed message
-            # print(str(self.idnode)+":"+"Tx:\t"
-            #      + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
+            print(str(self.idnode)+":"+"Tx:\t"
+                  + str(message)+"\tTx_ERR:"+str(self.ec.tx_err))
 
             self.bus.send(message)
             self.ec.msgtra = self.ec.msgtra + 1
@@ -66,3 +67,9 @@ class Transmitter(Node):
         if(self.ec.tx_err >= 256):
             print("ERROR COUNT REACHED. TRANSMISSION STOPPED.")
             return 0
+
+    def computeMsgId(self):
+        """
+        Computes the message id destination for a message
+        """
+        return random.randint(1, self.totalNodes)
