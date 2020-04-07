@@ -61,7 +61,8 @@ def prepareSim(params):
 
     # Receiver mask
     if(params["sign"]):
-        canFilter = [{"can_id": (node_id << 16), "can_mask": 0x000000000}]
+        # canFilter = [{"can_id": (node_id << 16), "can_mask": 0x000000000}]
+        canFilter = [{"can_id": 0x00000000, "can_mask": 0x000000000}]
     else:
         canFilter = [{"can_id": 0x1230 + node_id, "can_mask": 0x00001FFF}]
 
@@ -74,7 +75,9 @@ def prepareSim(params):
     for k in range(len(networkNodes)):
         if(params["sign"]):
             # canFilter[0]["can_id"] = canFilter[0]["can_id"]+0x00010000
-            newfilt = [{"can_id": canFilter[0]["can_id"],
+            # newfilt = [{"can_id": canFilter[0]["can_id"],
+            #            "can_mask": 0x000000000}]
+            newfilt = [{"can_id":  0x000000000,
                         "can_mask": 0x000000000}]
         else:
             newfilt = [{"can_id": canFilter[0]["can_id"] + k,

@@ -53,7 +53,7 @@ class Receiver(Node):
         """
         Receive and analyze the pakets
         """
-
+        self.ec.totRxBus = self.ec.totRxBus + 1
         # recvID = int(self.idnode)
 
         # tstmp = msg.timestamp
@@ -77,6 +77,7 @@ class Receiver(Node):
 
             # Determine if the message is correctly signed
             if(self.checkSign(msg)):
+                self.ec.msgrecsig = self.ec.msgrecsig + 1
                 # decodedId = self.getIdFromSign(msg)
                 # print("SIGNED"+hex(decodedId))
                 # Erroneous transmission

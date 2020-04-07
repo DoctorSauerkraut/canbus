@@ -24,8 +24,8 @@ class Logger:
         errorsCount = {"TXMAX": 0, "RXMAX": 0, "TXAVG": 0, "RXAVG": 0, "1B": 0}
         totErrOneB = 0
 
-        print("Node+ Filter    + Mask      +Txe+Rxe+Ttx+Rtx+1be+Stat+Sign ++ "
-              + "Rx del +Tx del  +Rec +Tra +Te delay+Re delay+")
+        print("Node+ Filter    + Mask      +Txe+Rxe+Ttx+Rtx+Stat+Sign ++ "
+              + "Rx del +Tx del  +Tra +Te delay+Re delay+Bus    +Node  +1be+ RSi +")
 
         for i in range(len(threads)):
             errc = threads[i][0].ec
@@ -38,8 +38,8 @@ class Logger:
                 status = "OFF"
 
             formatStr = "{:4s} {:11s} {:11s} {:3s} {:3s} {:3s} {:3s} {:3s} "
-            formatStr = formatStr + "{:4s} {:5s}++ {:8s} {:8s} {:4s} {:4s} "
-            formatStr = formatStr + "{:8s} {:8s}"
+            formatStr = formatStr + "{:4s} ++ {:8s} {:8s} {:4s} "
+            formatStr = formatStr + "{:8s} {:8s} {:7s} {:5s} {:5s} {:5s}"
 
             print(formatStr.format(
                     str(networkNodes[i][0]),
@@ -49,19 +49,21 @@ class Logger:
                     str(errc.rx_err),
                     str(errc.totTxErr),
                     str(errc.totRxErr),
-                    str(errc.onebyteErr),
                     status,
                     str(networkNodes[i][1]),
                     str(round(currentTime - errc.lastRc, 3)
-                        if (params["transmission"]) else " -  "),
-                    str(round(currentTime - errc.lastTr, 3)
                         if (params["reception"]) else " -  "),
-                    str(errc.msgrec),
+                    str(round(currentTime - errc.lastTr, 3)
+                        if (params["transmission"]) else " -  "),
                     str(errc.msgtra),
                     str(round(currentTime - errc.lastTx, 3)
                         if (params["transmission"]) else " -  "),
                     str(round(currentTime - errc.lastRx, 3)
-                        if (params["reception"]) else " -  ")))
+                        if (params["reception"]) else " -  "),
+                    str(errc.totRxBus),
+                    str(errc.msgrec),
+                    str(errc.onebyteErr),
+                    str(errc.msgrecsig)))
 
             totErrOneB = totErrOneB + errc.onebyteErr
 

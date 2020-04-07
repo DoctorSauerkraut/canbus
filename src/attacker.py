@@ -25,60 +25,64 @@ class Transmitter(threading.Thread):
         self.bus = bus_
         self.idnode = idnode_
         self.idThread = idThread_
-        
-    #Compare transmitted with received message when same id
+
+    # Compare transmitted with received message when same id
     def checkTransmission(self, mOnBus, mTrans):
         if(mOnBus.data != mTrans.data):
             return False
-    
+
     def run(self):
         """
         Starts the transmitter
         """
         trans.transmit()
-    
+
     def computeFalseData(self):
-        data=[]
+        data = []
 
-        for _ in range(0,7):
-            data.append(int(random.uniform(0,256)))
+        for _ in range(0, 7):
+            data.append(int(random.uniform(0, 256)))
 
+        data = [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0x00]
         return data[0:8]
-    
+
     def transmit(self):
         # build a message
-        tstmp  =time.time()
+        tstmp = time.time()
         sendOk = True
-        
-        id_count = 0x50b00000
-        falseData = [0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0x00]
+
+        id_count = 0x00080000
+        falseData = self.computeFalseData()
         r = self.idThread
         
-        while(sendOk==True):  
-            #Signed     
+        while(sendOk):  
+            # Signed     
             target = id_count
-                      
-            #Not signed
-            #target = id_count
-            
+
+            # Not signed
+            # target = id_count
+
             message = can.Message(timestamp=tstmp,
                 arbitration_id=target, 
                 extended_id=True,
                 is_error_frame=False,
                 data=falseData)
-                
+
             self.bus.send(message)
             print("Transmitting:"+str(message))
-            
+
             if(falseData[7] == 0xFF):
                 falseData[7] = 0x00
                 r = r + 5
+                id_count = id_count + 1
+                if (id_count == 0x0008FFFF):
+                    id_count = 0x00080000
             else:
                 falseData[7] = falseData[7] + 0x01
-                            
-            if(r>65536):
+
+            if(r > 65536):
                 r = 0
-            #time.sleep(5)
+            # time.sleep(5)
             
 if __name__=="__main__":
     # create a bus instance
