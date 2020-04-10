@@ -69,9 +69,8 @@ class KeyManager:
         Loads a specified key file
         """
         try:
-            f = open(config.KEYSPATH + str(idKey) + ".key", "r+")
-            for line in f:
-                return line
+            f = open(config.KEYSPATH + str(idKey) + ".key", "rb")
+            return f.read()
         except FileNotFoundError:
             print("No key file found for id:" + idKey)
 

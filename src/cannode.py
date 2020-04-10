@@ -124,13 +124,13 @@ class Node:
 
         try:
             # Load the key
-            strKey = self.kMgr.loadKey(self.idnode, grpId)
+            binKey = self.kMgr.loadKey(self.idnode, grpId)
 
             # Transform the key into binary array
-            binKey = bytearray()
-            binKey.extend(map(ord, strKey))
+            # binKey = bytearray()
+            # binKey.extend(map(ord, strKey))
         except UnauthorizedAccessToKey:
-            print("Node "+self.idnode+" tried to access to key "+str(strKey))
+            print("Node "+self.idnode+" tried to access to key " + grpId)
             return
 
         # Specify the CAN key

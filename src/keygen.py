@@ -16,12 +16,18 @@ class KeyGen:
     keyMap = {}
     msgMap = {}
 
-    def genKey(self, idKey):
+    def genKey(self):
+        """
+        Generates a random key
+        """
+        return "0123456789"
+
+    def genKeyFile(self, idKey):
         """
         Generates a new key file for a node
         """
         f = open(config.KEYSPATH + str(idKey) + ".key", "w")
-        f.write("0123456789")
+        f.write(self.genKey())
         f.close()
 
     def generateMsgMap(self, totalGroups, totalMessages):
@@ -48,7 +54,7 @@ class KeyGen:
 
         for g in range(0, totalGroups):
             self.keyMap[str(g)] = []
-            self.genKey(g)
+            self.genKeyFile(g)
 
             for j in range(0, totalNodes):
                 r = random.randint(0, 2)

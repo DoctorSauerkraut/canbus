@@ -25,7 +25,8 @@ class Logger:
         totErrOneB = 0
 
         print("Node+ Filter    + Mask      +Txe+Rxe+Ttx+Rtx+Stat+Sign ++ "
-              + "Rx del +Tx del  +Tra +Te delay+Re delay+Bus    +Node  +1be+ RSi +")
+              + "Rx del +Tx del  +Tra +Te delay+Re delay+Bus    +Node  +"
+              + "1be+ RSi +")
 
         for i in range(len(threads)):
             errc = threads[i][0].ec
