@@ -51,7 +51,7 @@ class Transmitter(threading.Thread):
         tstmp = time.time()
         sendOk = True
 
-        id_count = 0x00080000
+        id_count = 0x00030000
         falseData = self.computeFalseData()
         r = self.idThread
         

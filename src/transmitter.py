@@ -15,6 +15,7 @@ class Transmitter(Node):
         self.isSigned = isSigned_
         self.totalNodes = totalNodes_
         self.totalGroups = totalGroups_
+        self.isReceiver = False
 
     def transmit(self):
         # build a message

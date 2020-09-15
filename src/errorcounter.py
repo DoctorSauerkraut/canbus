@@ -23,6 +23,7 @@ class ErrorCounter:
     msgrecsig = 0
     errorsDelay = {}
 
+    """
     def mapErrors(self):
         t = time.time()
         diff = t - self.lastOb
@@ -37,3 +38,4 @@ class ErrorCounter:
         for i in self.errorsDelay:    
             file.write(str(i)+"\t"+str(self.errorsDelay[str(i)])+"\n")
         file.close()
+    """

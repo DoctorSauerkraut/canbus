@@ -45,7 +45,7 @@ def launchNode(nodeId, canFilter, networkNodes, isSigned, params):
     if(params["transmission"]):
         print("Starting the transmitter " + str(nodeId))
         transThread.start()
-
+        
     return (recThread, transThread)
 
 
@@ -89,7 +89,7 @@ def prepareSim(params):
                                   networkNodes,
                                   networkNodes[k][1],
                                   params))
-
+    
     return (threads, filters, networkNodes)
 
 

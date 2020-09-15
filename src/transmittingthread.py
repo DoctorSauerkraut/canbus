@@ -28,3 +28,4 @@ class TransmittingThread(threading.Thread):
         trans = Transmitter(self.bus, self.idnode, self.networkNodes, self.ec,
                             self.isSigned, self.totalNodes, self.totalGroups)
         trans.transmit()
+        trans.setThread(self)

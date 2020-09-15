@@ -15,6 +15,7 @@ class Receiver(Node):
         self.bus = bus_
         self.ec = ec_
         self.isSigned = isSigned_
+        self.isReceiver = True
 
     def printReceiverInfo(self):
         """

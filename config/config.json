@@ -1,0 +1,14 @@
+{
+    "id": 0,
+    "sign": true,
+    "nbNodes": 1,
+    "totalNodes":1,
+    "groups":10,
+    "messages":4000,
+    "verbose": true,
+    "delay": 200000,
+    "channel":"vcan0",
+    "reception":true,
+    "transmission":true
+    
+}

@@ -5,6 +5,11 @@ import time
 
 
 class Logger:
+
+    @staticmethod
+    def log(s):
+        print(s)
+
     def logSim(self, threads, filters, networkNodes, params):
         """
         Simulation logging-dedicated function
@@ -15,18 +20,15 @@ class Logger:
         currentTime = time.time()
         d = round(currentTime-params["startTime"], 3)
 
-        #  \t+Rx_err\t+Tot Tx\t+Tot Rx\t+1b err\t+Status\t"
-        #    + "Signed\t+Tx del + Rx del + Rec \t+ Tra \t+ Mask \t\t"
-        #    + "+Tx err delay \t+Rx err delay\t+")
 
         # Monitoring purposes
         statusCount = {"OK": 0, "PASS": 0, "OFF": 0}
         errorsCount = {"TXMAX": 0, "RXMAX": 0, "TXAVG": 0, "RXAVG": 0, "1B": 0}
         totErrOneB = 0
-
+        
         print("Node+ Filter    + Mask      +Txe+Rxe+Ttx+Rtx+Stat+Sign ++ "
               + "Rx del +Tx del  +Tra +Te delay+Re delay+Bus    +Node  +"
-              + "1be+ RSi +")
+              + "Rej+ RSi +")
 
         for i in range(len(threads)):
             errc = threads[i][0].ec
@@ -77,17 +79,36 @@ class Logger:
             errorsCount["TXAVG"] = errorsCount["TXAVG"] + errc.tx_err
             errorsCount["RXAVG"] = errorsCount["RXAVG"] + errc.rx_err
             errorsCount["1B"] = errorsCount["1B"] + errc.onebyteErr
-
+        
         print("------------------------------------------------")
-        print("Time: "+str(d)+" s")
-        print("Status Nodes:"+str(nbNodes)
-              + " OK:"+str(statusCount["OK"])
-              + " PASS:"+str(statusCount["PASS"])
-              + " OFF:"+str(statusCount["OFF"]))
+        print("Time:\t "+str(d)+" s")
+        print("Total number of nodes:\t"+str(params["totalNodes"]))
+        print("Local number of nodes:\t"+str(len(threads)))
 
-        print("Errors Tx MAX:"+str(errorsCount["TXMAX"])
-              + " \tAVG:"+str(errorsCount["TXAVG"]/nbNodes)
-              + " \tRx MAX:"+str(errorsCount["RXMAX"])
-              + "\tAVG:"+str(errorsCount["RXAVG"]/nbNodes))
+        aliveThreadsR = 0
+        aliveThreadsT = 0
+        # We only count transmitter threads because there is a Notifier thread linked
+        # to the receivers
+        for t in threads:
+            if(t[0].getNotifier() != None):
+                if t[0].getNotifier()._running:
+                    aliveThreadsR = aliveThreadsR + 1
+            if t[1].is_alive():
+                aliveThreadsT = aliveThreadsT + 1
+
+        print("Transmitters alive:\t"+str(aliveThreadsR)+"/"+str(len(threads)))
+        print("Receivers alive:\t"+str(aliveThreadsT)+"/"+str(len(threads)))
+
+        # print("Status Nodes:"+str(nbNodes)
+        #      + " OK:"+str(statusCount["OK"])
+        #      + " PASS:"+str(statusCount["PASS"])
+        #      + " OFF:"+str(statusCount["OFF"]))
+
+        # print("Errors Tx MAX:"+str(errorsCount["TXMAX"])
+        #       + "\nAVG:"+str(errorsCount["TXAVG"]/nbNodes)
+        #       + "\nRx MAX:"+str(errorsCount["RXMAX"])
+        #       + "\nAVG:"+str(errorsCount["RXAVG"]/nbNodes)
+        #       + "\n1b:"+str(totErrOneB)
+        #       + "\nAVG:"+str(totErrOneB/nbNodes))
 
         return errorsCount

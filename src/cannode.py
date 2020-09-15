@@ -19,6 +19,11 @@ class Node:
     ec = None  # Error counter
     # Currently transmitting message
     networkNodes = []
+    thread = None
+    isReceiver = False
+
+    def setThread(self, thread):
+        self.thread = thread
 
     def ByteToHex(self, byteStr):
         return ''.join('{:02x}'.format(x) for x in byteStr)
@@ -26,16 +31,29 @@ class Node:
     # Verify data signature
     def checkSign(self, msg):
         if(self.isSigned):
-            dts = str(self.ByteToHex(msg.data[0:7]))
-            if (dts in self.counters):
-                toCheck = dts + str(self.counters[dts])
-            else:
-                toCheck = dts
+            dts = self.ByteToHex(msg.data[0:7])
 
-            # print("ID:"+str(self.idnode)+" COUNTER:"+str(self.counters[dts]))
-            # print("ARB ID:"+hex(msg.arbitration_id))
+            # Computing Message id
             idMsg = self.getIdFromSign(msg)
-            # print("ID:"+str(idMsg))
+
+            # Checking if this id has already been received (replay attacks)
+            toCheck = hex(int(dts, 16))
+
+            if (idMsg in self.counters):
+                try:
+                    toCheck = hex(int(dts, 16) + self.counters[idMsg])[2:]
+                except KeyError:
+                    if(self.isReceiver):
+                        self.thread.stop()
+                    else:
+                        self.thread.terminate()
+
+            # Padding
+            if(len(toCheck) < 14):
+                toCheck = "0"+toCheck
+            # print("IDMSG:"+str(idMsg)+" "+str(self.counters[idMsg]))
+            
+            # Computing signature
             signData = self.computeHMAC(toCheck, idMsg)
 
             signMsg = []
@@ -43,23 +61,21 @@ class Node:
             signMsg.append(msg.arbitration_id & 0x000000FF)
             signMsg.append(msg.arbitration_id >> 8 & 0x000000FF)
 
-            # arb_id = msg.arbitration_id >> 16
-            # print("DATA:"+dts+" SIGN:"+self.ByteToHex(signData))
+            # print("IDMSG:"+str(idMsg)+" TOCHECK:"+str(toCheck)+" Sign:"+
+            # self.ByteToHex(signData)
+            #       +" Rec:"+self.ByteToHex(signMsg)) 
 
+            # If computed and received signature are identical
             if(signMsg == signData):
-                self.counters[dts] = self.counters[dts] + 0x01
-                # print("ID:"+str(self.idnode)+" SIGN OK")
                 # Counter against replay attack increasing
-                dts = str(self.ByteToHex(msg.data))
-                if(dts in self.counters):
-                    self.counters[dts] = self.counters[dts] + 0x01
+                # self.counters[idMsg] = self.counters[idMsg] + 0x01
                 return True
-            elif(signMsg[0] == signData[0]):
+            else:
                 self.ec.onebyteErr = self.ec.onebyteErr + 1
-                self.ec.mapErrors()
-                # print("1 B Error at time:"+hex(signMsg[0])+" "
-                # +hex(signData[0])+ " "+str(msg))
-            return False
+                # print("ERROR MSG:"+str(idMsg)+" TOCHECK:"+str(toCheck)+" 
+                # Sign:"+self.ByteToHex(signData)) 
+                # self.ec.mapErrors()
+                return False
         else:
             return True
 
@@ -69,21 +85,26 @@ class Node:
         """
         if(self.isSigned):
             dataConverted = self.ByteToHex(msg.data)
-            dts = str(dataConverted + str(self.counters[str(dataConverted)]))
-            rst = self.computeHMAC(dts, msgId)
+            dts = str(dataConverted)
+            # We keep in history the number of times this id has been used to
+            # prevent replay attacks
+            if (msgId in self.counters):
+                self.counters[msgId] = self.counters[msgId] + 0x01
+                toCheck = hex(int(dts, 16) + self.counters[msgId])[2:]
+            else:
+                toCheck = dts
+                self.counters[msgId] = 0x00
+
+            # print(type(toCheck))
+            # print("SEND MSGID:"+str(msgId) + " Count:" 
+            #      + str(self.counters[msgId])
+            #      + " " + str(dts) + " " + str(toCheck))
+ 
+            rst = self.computeHMAC(toCheck, msgId)
 
             # Encoded ID computation
             encId = (((msg.arbitration_id << 8) + rst[2]) << 8) + rst[1]
 
-            # Sent message logging
-            # print("INIT DATA:" + str(dataConverted))
-            # print("DATA TO SIGN:" + str(dts))
-            # print("COUNTER:" + str(self.counters[str(dataConverted)]))
-            # print("MSG ID:" + str(msgId))
-            # print("NODE:" + str(self.idnode))
-            # print("SIGNATURE:" + " " + hex(rst[2]) + " "
-            #       + hex(rst[1]) + " " + hex(rst[0]))
-            # print("ARB ID:"+hex(msg.arbitration_id)+" ENC ID:"+hex(encId))
             return (encId, data+[rst[0]])
         else:
             return (msg.arbitration_id, data)
@@ -137,8 +158,7 @@ class Node:
         hmacComp = hmac.new(binKey, data.encode("utf-8"), hashlib.sha256)
         digest = hmacComp.digest()
         rst = (list(bytearray(digest)))
-
-        # print(self.ByteToHex(rst))
+        # print("ID:"+str(msgId)+" Data:"+str(data)+" Sign"+self.ByteToHex(rst[29:32]))
         return rst[29:32]
 
     def computeData(self):
